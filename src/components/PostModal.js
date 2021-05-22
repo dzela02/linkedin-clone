@@ -1,11 +1,15 @@
 import styled from "styled-components"
 import { useState } from "react";
+import ReactPlayer from 'react-player';
+import { connect } from "react-redux";
 
 const PostModal = (props) => {
     const [editorText, setEditorText] = useState('');
     const [shareImage, setShareImage] = useState('');
+    const [videoLink, setVideoLink] = useState('');
+    const [assetArea, setAssetArea] = useState('');
     const handleChange = (e) => {
-        const image = e.targe.files[0];
+        const image = e.target.files[0];
 
         if (image === '' || image === undefined){
             alert(`Nije slika buraz ne jebi nas ${typeof image}`);
@@ -13,8 +17,16 @@ const PostModal = (props) => {
         }
         setShareImage(image);
     };
+    const switchAssetArea = (area) => {
+        setShareImage('');
+        setVideoLink('');
+        setAssetArea(area);
+    };
+
     const reset = (e) => {
         setEditorText("");
+        setShareImage('');
+        setVideoLink('');
         props.handleClick(e);
     }
     return (
@@ -30,21 +42,50 @@ const PostModal = (props) => {
                     </Header>
                     <SharedContent>
                         <UserInfo>
-                            <img src='/images/user.svg' alt='If no profile have this dum dum' />
-                            <span>Name</span>
+                            {props.user && props.user.photoURL ?
+                                (<img src={props.user.photoURL} alt="User profile picture" />) :
+                                (<img src="/images/user.svg" alt ="" />)}
+                            <span>{props.user.displayName}</span>
+
                         </UserInfo>
                         <Editor>
-                            <textarea value={editorText} onChange={(e) => setEditorText(e.target.value)} placeholder='O cemu nam zelis pricat?' autoFocus='true'>
-
-                            </textarea>
+                            <textarea value={editorText} onChange={(e) => setEditorText(e.target.value)} placeholder='O cemu nam zelis pricat?' autoFocus='true'/>
+                            { assetArea === 'image' ?
+                                (<UploadImage>
+                                    <input type='file'
+                                        accept='image/gif, image/jpeg, image/png, image/jpg'
+                                        name='image'
+                                        id='file'
+                                        style={{display: "none"}} 
+                                        onChange={handleChange}
+                                    />
+                                    <p>
+                                        <label htmlFor='file'>
+                                            Izaberi slicku tebro
+                                        </label>
+                                    </p>
+                                    {shareImage && <img src={URL.createObjectURL(shareImage)} /> }
+                                    </UploadImage>)
+                                    : assetArea === 'media' && (
+                                    <>
+                                        <input 
+                                            type='text'
+                                            placeholder="Neces slicku stavi link videa"
+                                            value={videoLink}
+                                            onChange={(e) => setVideoLink(e.target.value)}
+                                        />
+                                        {videoLink && <ReactPlayer width={"100%"} url={videoLink}/>}
+                                    </>)
+                                
+                            }
                         </Editor>
                     </SharedContent>
                     <ShareCreation>
                         <AttachAssets>
-                            <AssetButton>
+                            <AssetButton onClick ={() => switchAssetArea('image')}>
                                 <img src='/images/share.svg' alt='Share button' />
                             </AssetButton>
-                            <AssetButton>
+                            <AssetButton onClick={() => switchAssetArea('media')}>
                                 <img src='/images/video.svg' alt='Share video button' />
                             </AssetButton>
                         </AttachAssets>
@@ -200,7 +241,6 @@ const PostButton = styled.button`
     border-radius: 20px;
     padding-left: 16px;
     padding-right: 16px;
-    
     background: ${props => props.disabled ? 'rgba(0,0,0,0.8)' : "#0a66c2" };
     color: ${props =>props.disabled ? 'rgba(1,1,1,0.2)' : "white" };
     cursor: ${props => props.disabled ? "" : "pointer" };
@@ -225,4 +265,21 @@ const Editor = styled.div`
 
     }
 `;
-export default PostModal;
+
+const UploadImage = styled.div`
+    text-align: center;
+    img {
+        width: 100%;
+    }
+`;
+
+const mapStateToProps = (state) => {
+    return {
+        user: state.userState.user,
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {};
+};
+export default connect(mapStateToProps, mapDispatchToProps)(PostModal);

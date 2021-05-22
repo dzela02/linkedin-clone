@@ -309,4 +309,6 @@ const SocialActions = styled.div`
         }
     }
 `;
+
+
 export default Main;
