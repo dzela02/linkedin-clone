@@ -11,7 +11,7 @@ function Home(props) {
         <Container>
             {!props.user && <Redirect to='/' />}
             <Section>
-                <h5><a>Hiring in a hurry? - </a></h5>
+                <h5><a href='https://www.upwork.com/' target="_blank">Hiring in a hurry? - </a></h5>
                 <p>
                     Find talented pros in record time with Upwork!
                 </p>
@@ -46,6 +46,7 @@ const Section = styled.section`
     h5 {
         color: #0a66c2;
         font-size: 14px;
+        cursor: pointer;
         a {
             font-weight: 700;
         }
