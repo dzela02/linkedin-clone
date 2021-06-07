@@ -1,12 +1,20 @@
 import { auth, provider, storage } from "../firebase";
 import db from "../firebase";
-import { SET_USER } from "./actionType";
+import { SET_USER, SET_LOADING_STATUS } from "./actionType";
+
+// Stanja koja idu kroz API
 
 export const setUser = (payload) => ({
   type: SET_USER,
   user: payload,
 });
 
+export const setLoading = (status) => ({
+  type: SET_LOADING_STATUS,
+  status: status,
+});
+
+// Login
 export function signInAPI() {
   return (dispatch) => {
     auth
@@ -17,7 +25,7 @@ export function signInAPI() {
       .catch((error) => alert(error.message));
   };
 }
-
+// UserAUTH provera gugl naloga
 export function getUserAuth() {
   return (dispatch) => {
     auth.onAuthStateChanged(async (user) => {
@@ -27,7 +35,7 @@ export function getUserAuth() {
     });
   };
 }
-
+// Log off
 export function signOutAPI() {
   return (dispatch) => {
     auth
@@ -41,8 +49,11 @@ export function signOutAPI() {
   };
 }
 
+//API => Slanje podataka firebaseu i skloni console logove jebem ti mater
+
 export function postArticleAPI(payload) {
   return (dispatch) => {
+    dispatch(setLoading(true));
     if (payload.image != "") {
       const upload = storage
         .ref(`images/${payload.image.name}`)
@@ -73,9 +84,11 @@ export function postArticleAPI(payload) {
             comments: 0,
             description: payload.description,
           });
+          dispatch(setLoading(false));
         }
       );
     } else if (payload.video) {
+      dispatch(setLoading(true));
       db.collection("articles").add({
         actor: {
           description: payload.user.email,
@@ -88,6 +101,20 @@ export function postArticleAPI(payload) {
         comments: 0,
         description: payload.description,
       });
+      dispatch(setLoading(false));
     }
   };
+}
+
+//API za skidanje posta sa Firebasea
+
+{
+  /*export function getArticleAPI() {
+  retrun (dispatch) => {
+    let payload;
+
+    db.collection('articles')
+  }
+}
+*/
 }
